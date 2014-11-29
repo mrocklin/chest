@@ -24,6 +24,49 @@ Alternatively one might consider a traditional key-value store database like
 Redis_.
 
 
+How it works
+------------
+
+Chest stores data in two locations
+
+1.  An in-memory dictionary
+2.  On the filesystem in a directory owned by the chest
+
+As a user adds contents to the chest the in-memory dictionary fills up.  When
+a chest stores more data in memory than desired (see ``available_memory=``
+keyword argument) it writes the larger contents of the chest to disk as pickle
+files (the choice of ``pickle`` is configurable).  When a user asks for a value
+chest checks the in-memory store, then checks on-disk and loads the value into
+memory if necessary, pushing other values to disk.
+
+Chest is a simple project.  It was intended to provide a simple interface to
+assist in the storage and retrieval of numpy arrays.  However it's design and
+implementation are agnostic to this case and so could be used in a variety of
+other situations.
+
+With minimal work chest could be extended to serve as a communication point
+between multiple processes.
+
+
+Known Failings
+--------------
+
+Chest was designed to hold a moderate amount of largish numpy arrays.  It
+doesn't handle the very many small key-value pairs usecase (though could with
+small effort).  In particular chest has the following deficiencies
+
+1.  It determines what values to spill to disk by size.  The largest values are
+    spilled.  This can be improved by better determination of size (see the
+    ``nbytes`` function) and consideration of time-of-use (like an LRU
+    mechanism.)
+2.  Spill conditions are checked after every action.  Spill conditions often
+    involve an ``n log(n)`` sorting process.  This could be improved by
+    tracking and efficiently updating the size of all values iteratively.
+3.  Chest is not multi-process safe.  We should institute a file lock at least
+    around the ``.keys`` file.
+4.  Chest does not support mutation of variables on disk.
+
+
 LICENSE
 -------
 
@@ -79,25 +122,6 @@ Example
 
     >>> json.load(open('my-chest'))
     [1, 2, 3]
-
-
-Known Failings
---------------
-
-Chest was designed to hold a moderate amount of largish numpy arrays.  It
-doesn't handle the very many small key-value pairs usecase (though could with
-small effort).  In particular chest has the following deficiencies
-
-1.  It determines what values to spill to disk by size.  The largest values are
-    spilled.  This can be improved by better determination of size (see the
-    ``nbytes`` function) and consideration of time-of-use (like an LRU
-    mechanism.)
-2.  Spill conditions are checked after every action.  Spill conditions often
-    involve an ``n log(n)`` sorting process.  This could be improved by
-    tracking and efficiently updating the size of all values iteratively.
-3.  Chest is not multi-process safe.  We should institute a file lock at least
-    around the ``.keys`` file.
-4.  Chest does not support mutation of variables on disk.
 
 
 Dependencies
