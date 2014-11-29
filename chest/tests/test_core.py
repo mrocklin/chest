@@ -1,4 +1,4 @@
-from chest import Chest
+from chest.core import Chest, nbytes
 import os
 import pickle
 from contextlib import contextmanager
