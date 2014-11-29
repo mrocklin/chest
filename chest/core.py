@@ -52,7 +52,7 @@ class Chest(MutableMapping):
 
     >>> c.flush()
     >>> import os
-    >>> os.listdir(c.path)
+    >>> sorted(os.listdir(c.path))
     ['.keys', 'x']
 
     >>> c.drop()
