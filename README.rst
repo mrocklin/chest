@@ -101,3 +101,9 @@ Chest was originally created by `Matthew Rocklin`_
 .. _Redis: http://redis.io/
 .. |Build Status| image:: https://travis-ci.org/mrocklin/chest.png
    :target: https://travis-ci.org/mrocklin/chest
+.. |Coverage Status| image:: https://coveralls.io/repos/mrocklin/chest/badge.png
+   :target: https://coveralls.io/r/mrocklin/chest
+.. |Version Status| image:: https://pypip.in/v/chest/badge.png
+   :target: https://pypi.python.org/pypi/chest/
+.. |Downloads| image:: https://pypip.in/d/chest/badge.png
+   :target: https://pypi.python.org/pypi/chest/
