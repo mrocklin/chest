@@ -89,10 +89,9 @@ doesn't handle the very many small key-value pairs usecase (though could with
 small effort).  In particular chest has the following deficiencies
 
 1.  It determines what values to spill to disk by size.  The largest values are
-    spilled.  This can be improved in the following ways:
-    *   Better determination of size.  See the ``nbytes`` function.
-    *   Consideration of time-of-use.  A simple LRU mechanism would go a long
-        way
+    spilled.  This can be improved by better determination of size (see the
+    ``nbytes`` function) and consideration of time-of-use (like an LRU
+    mechanism.)
 2.  Spill conditions are checked after every action.  Spill conditions often
     involve an ``n log(n)`` sorting process.  This could be improved by
     tracking and efficiently updating the size of all values iteratively.
