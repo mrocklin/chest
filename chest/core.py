@@ -7,6 +7,8 @@ import os
 import pickle
 
 
+DEFAULT_AVAILABLE_MEMORY = 1e9
+
 def key_to_filename(key):
     """ Return a filename from any kind of hashable key
 
@@ -71,7 +73,7 @@ class Chest(MutableMapping):
         self.path = path or tempfile.mkdtemp('.chest')
         # Amount of memory we're allowed to use
         self.available_memory = (available_memory if available_memory
-                                 is not None else 1e9)
+                                 is not None else DEFAULT_AVAILABLE_MEMORY)
         # Functions to control disk I/O
         self.load = load
         self.dump = dump
