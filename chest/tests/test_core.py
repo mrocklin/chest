@@ -1,5 +1,6 @@
-from chest.core import Chest, nbytes
+from chest.core import Chest, nbytes, key_to_filename
 import os
+import re
 import json
 import shutil
 import pickle
@@ -226,3 +227,10 @@ def test_basic_json():
 
         assert c2[1] == c[1]
         assert c2[2] == c[2]
+
+
+def test_key_to_filename():
+    assert key_to_filename('x') == 'x'
+    assert isinstance(key_to_filename((1, (3, 4))), str)
+
+    assert re.match('^\w+$', key_to_filename('1/2'))

@@ -4,6 +4,7 @@ import sys
 import tempfile
 import shutil
 import os
+import re
 import pickle
 
 
@@ -16,7 +17,7 @@ def key_to_filename(key):
     >>> type(key_to_filename(('foo', 'bar'))).__name__
     'str'
     """
-    if isinstance(key, str):
+    if isinstance(key, str) and re.match('^[_a-zA-Z]\w*$', key):
         return key
     else:
         return str(abs(hash(key)))
