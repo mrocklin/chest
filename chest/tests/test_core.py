@@ -1,5 +1,6 @@
 from chest.core import Chest, nbytes
 import os
+import json
 import shutil
 import pickle
 from contextlib import contextmanager
@@ -212,3 +213,16 @@ def test_del_on_normal_path():
 
     c = Chest(path=path)
     c.drop()
+
+
+def test_basic_json():
+    with tmp_chest(load=json.load, dump=json.dump, mode='t') as c:
+        c[1] = [1, 2, 3]
+        c[2] = 'two'
+
+        c.flush()
+
+        c2 = Chest(path=c.path, load=json.load, dump=json.dump, mode='t')
+
+        assert c2[1] == c[1]
+        assert c2[2] == c[2]

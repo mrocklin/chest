@@ -44,6 +44,8 @@ class Chest(MutableMapping):
         A function like pickle.load or json.load that loads contents from file
     key_to_filename : function (optional)
         A function to determine filenames from key values
+    mode : str (t or b)
+        Binary or text mode for file storage
 
     Examples
     --------
@@ -63,7 +65,8 @@ class Chest(MutableMapping):
     def __init__(self, data=None, path=None, available_memory=None,
                  dump=partial(pickle.dump, protocol=pickle.HIGHEST_PROTOCOL),
                  load=pickle.load,
-                 key_to_filename=key_to_filename):
+                 key_to_filename=key_to_filename,
+                 mode='b'):
         # In memory storage
         self.inmem = data or dict()
         # A set of keys held both in memory or on disk
@@ -78,12 +81,13 @@ class Chest(MutableMapping):
         # Functions to control disk I/O
         self.load = load
         self.dump = dump
+        self.mode = mode
         self._key_to_filename = key_to_filename
 
         if os.path.exists(self.path):
             keyfile = os.path.join(self.path, '.keys')
             if os.path.exists(keyfile):
-                with open(keyfile, mode='rb') as f:
+                with open(keyfile, mode='r'+self.mode) as f:
                     self._keys = set(self.load(f))
         else:
             os.mkdir(self.path)
@@ -98,7 +102,7 @@ class Chest(MutableMapping):
     def move_to_disk(self, key):
         """ Move data from memory onto disk """
         fn = self.key_to_filename(key)
-        with open(fn, mode='wb') as f:
+        with open(fn, mode='w'+self.mode) as f:
             self.dump(self.inmem[key], f)
         del self.inmem[key]
 
@@ -108,7 +112,7 @@ class Chest(MutableMapping):
             return
 
         fn = self.key_to_filename(key)
-        with open(fn, mode='rb') as f:
+        with open(fn, mode='r'+self.mode) as f:
             self.inmem[key] = self.load(f)
 
     def __getitem__(self, key):
@@ -186,7 +190,7 @@ class Chest(MutableMapping):
 
     def write_keys(self):
         fn = os.path.join(self.path, '.keys')
-        with open(fn, mode='wb') as f:
+        with open(fn, mode='w'+self.mode) as f:
             self.dump(list(self._keys), f)
 
     def flush(self):
