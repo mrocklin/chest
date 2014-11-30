@@ -61,12 +61,18 @@ class Chest(MutableMapping):
                  dump=partial(pickle.dump, protocol=2),
                  load=pickle.load,
                  key_to_filename=key_to_filename):
+        # In memory storage
         self.inmem = data or dict()
+        # A set of keys held both in memory or on disk
         self._keys = set()
-        self._tmpdir = path is None
+        # Was a path given or no?  If not we'll clean up the directory later
+        self._explicitly_given_path = path is not None
+        # Diretory where the on-disk data will be held
         self.path = path or tempfile.mkdtemp('.chest')
+        # Amount of memory we're allowed to use
         self.available_memory = (available_memory if available_memory
                                  is not None else 1e9)
+        # Functions to control disk I/O
         self.load = load
         self.dump = dump
         self._key_to_filename = key_to_filename
@@ -136,7 +142,7 @@ class Chest(MutableMapping):
         self.shrink()
 
     def __del__(self):
-        if self._tmpdir and os.path.exists(self.path):
+        if not self._explicitly_given_path and os.path.exists(self.path):
             self.drop()
 
     def __iter__(self):
