@@ -58,7 +58,7 @@ class Chest(MutableMapping):
     >>> c.drop()
     """
     def __init__(self, data=None, path=None, available_memory=None,
-                 dump=partial(pickle.dump, protocol=2),
+                 dump=partial(pickle.dump, protocol=pickle.HIGHEST_PROTOCOL),
                  load=pickle.load,
                  key_to_filename=key_to_filename):
         # In memory storage
