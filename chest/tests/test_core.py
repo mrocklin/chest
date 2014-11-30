@@ -4,18 +4,23 @@ import pickle
 from contextlib import contextmanager
 import numpy as np
 from chest.utils import raises
+import time
 
 
 @contextmanager
 def tmp_chest(*args, **kwargs):
     c = Chest(*args, **kwargs)
+    fn = c.path
 
     try:
         yield c
     finally:
-        if os.path.exists(c.path):
+        if os.path.exists(fn):
             c.drop()
-        del c
+        try:
+            del c
+        except:
+            pass
 
 
 def test_basic():
@@ -173,3 +178,17 @@ def test_nbytes():
     assert isinstance(nbytes('x'), int)
     assert nbytes('x') < 100
     assert nbytes(np.ones(1000, dtype='i4')) >= 4000
+
+
+def test_del_on_temp_path():
+    c = Chest()
+    c[1] = 'one'
+    c.flush()
+
+    fn = c.path
+    del c
+
+    import gc
+    gc.collect()
+
+    assert not os.path.exists(fn)

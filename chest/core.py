@@ -63,7 +63,8 @@ class Chest(MutableMapping):
                  key_to_filename=key_to_filename):
         self.inmem = data or dict()
         self._keys = set()
-        self.path = path or tempfile.mkdtemp('chest')[1]
+        self._tmpdir = path is None
+        self.path = path or tempfile.mkdtemp('.chest')
         self.available_memory = (available_memory if available_memory
                                  is not None else 1e9)
         self.load = load
@@ -71,9 +72,10 @@ class Chest(MutableMapping):
         self._key_to_filename = key_to_filename
 
         if os.path.exists(self.path):
-            fn = os.path.join(self.path, '.keys')
-            with open(fn, mode='rb') as f:
-                self._keys = self.load(f)
+            keyfile = os.path.join(self.path, '.keys')
+            if os.path.exists(keyfile):
+                with open(keyfile, mode='rb') as f:
+                    self._keys = set(self.load(f))
         else:
             os.mkdir(self.path)
 
@@ -132,6 +134,10 @@ class Chest(MutableMapping):
         self._keys.add(key)
 
         self.shrink()
+
+    def __del__(self):
+        if self._tmpdir and os.path.exists(self.path):
+            self.drop()
 
     def __iter__(self):
         return iter(self._keys)
