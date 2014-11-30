@@ -9,6 +9,7 @@ import pickle
 
 DEFAULT_AVAILABLE_MEMORY = 1e9
 
+
 def key_to_filename(key):
     """ Return a filename from any kind of hashable key
 
