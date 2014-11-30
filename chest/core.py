@@ -187,7 +187,7 @@ class Chest(MutableMapping):
     def write_keys(self):
         fn = os.path.join(self.path, '.keys')
         with open(fn, mode='wb') as f:
-            self.dump(self._keys, f)
+            self.dump(list(self._keys), f)
 
     def flush(self):
         """ Flush all in-memory storage to disk """
