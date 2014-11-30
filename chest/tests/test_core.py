@@ -1,5 +1,6 @@
 from chest.core import Chest, nbytes
 import os
+import shutil
 import pickle
 from contextlib import contextmanager
 import numpy as np
@@ -192,3 +193,22 @@ def test_del_on_temp_path():
     gc.collect()
 
     assert not os.path.exists(fn)
+
+
+def test_del_on_normal_path():
+    path = '_chest_test_path'
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+    c = Chest(path=path)
+    c[1] = 'one'
+    c.flush()
+
+    del c
+    import gc
+    gc.collect()
+
+    assert os.path.exists(path)
+
+    c = Chest(path=path)
+    c.drop()
