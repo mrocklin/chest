@@ -200,6 +200,17 @@ class Chest(MutableMapping):
             self.move_to_disk(key)
         self.write_keys()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, eType, eValue, eTrace):
+        if not self._explicitly_given_path and os.path.exists(self.path):
+            self.drop()  # pragma: no cover
+
+        if eValue is not None:
+            raise eValue
+
+
 
 def nbytes(o):
     """ Number of bytes of an object

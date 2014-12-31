@@ -234,3 +234,11 @@ def test_key_to_filename():
     assert isinstance(key_to_filename((1, (3, 4))), str)
 
     assert re.match('^\w+$', key_to_filename('1/2'))
+
+
+def test_context_manager():
+    with Chest() as c:
+        c[1] = 1
+        c.flush()
+
+    assert not os.path.exists(c.path)
