@@ -1,5 +1,6 @@
 from collections import MutableMapping
 from functools import partial
+from threading import Lock
 import sys
 import tempfile
 import shutil
@@ -93,6 +94,8 @@ class Chest(MutableMapping):
         else:
             os.mkdir(self.path)
 
+        self.lock = Lock()
+
     def __str__(self):
         return '<chest at %s>' % self.path
 
@@ -125,8 +128,9 @@ class Chest(MutableMapping):
         if key not in self._keys:
             raise KeyError("Key not found: %s" % key)
 
-        self.get_from_disk(key)
-        result = self.inmem[key]
+        with self.lock:
+            self.get_from_disk(key)
+            result = self.inmem[key]
         self.shrink()
         return result
 
@@ -141,11 +145,12 @@ class Chest(MutableMapping):
         self._keys.remove(key)
 
     def __setitem__(self, key, value):
-        if key in self._keys:
-            del self[key]
+        with self.lock:
+            if key in self._keys:
+                del self[key]
 
-        self.inmem[key] = value
-        self._keys.add(key)
+            self.inmem[key] = value
+            self._keys.add(key)
 
         self.shrink()
 
@@ -164,7 +169,9 @@ class Chest(MutableMapping):
 
     @property
     def memory_usage(self):
-        return sum(map(nbytes, self.inmem.values()))
+        with self.lock:
+            result = sum(map(nbytes, self.inmem.values()))
+        return result
 
     def shrink(self):
         """
@@ -174,16 +181,17 @@ class Chest(MutableMapping):
         improved to LRU or some such.  Ideally this becomes an input.
         """
         mem = self.memory_usage
-
         if mem < self.available_memory:
             return
-        inmem = sorted(self.inmem.items(),
-                       key=lambda kv: nbytes(kv[1]))
 
-        while inmem and mem > self.available_memory:
-            key, data = inmem.pop()
-            self.move_to_disk(key)
-            mem -= nbytes(data)
+        with self.lock:
+            inmem = sorted(self.inmem.items(),
+                           key=lambda kv: nbytes(kv[1]))
+
+            while inmem and mem > self.available_memory:
+                key, data = inmem.pop()
+                self.move_to_disk(key)
+                mem -= nbytes(data)
 
     def drop(self):
         """ Permanently remove directory from disk """
@@ -196,9 +204,10 @@ class Chest(MutableMapping):
 
     def flush(self):
         """ Flush all in-memory storage to disk """
-        for key in list(self.inmem):
-            self.move_to_disk(key)
-        self.write_keys()
+        with self.lock:
+            for key in list(self.inmem):
+                self.move_to_disk(key)
+            self.write_keys()
 
     def __enter__(self):
         return self

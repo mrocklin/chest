@@ -93,6 +93,15 @@ def test_limited_shrink_called_normally():
         assert not c.inmem
 
 
+def test_shrink():
+    with tmp_chest(available_memory=100) as c:
+        c['one'] = np.ones(10, dtype='i8')  # 80 bytes
+        assert 'one' in c.inmem
+        c['two'] = 2 * np.ones(5, dtype='i8')  # 40 bytes
+        assert 'two' in c.inmem
+        assert 'one' not in c.inmem
+
+
 def test_drop():
     with tmp_chest() as c:
         c.drop()
@@ -242,3 +251,24 @@ def test_context_manager():
         c.flush()
 
     assert not os.path.exists(c.path)
+
+
+def test_threadsafe():
+    from multiprocessing.pool import ThreadPool
+    from random import randint
+
+    pool = ThreadPool(8)
+    with tmp_chest(available_memory=48) as c:
+        for i in range(10):
+            c[i] = i
+
+        def getset(_):
+            c[randint(0, 9)] = c[randint(0, 9)]
+
+        pool.map(getset, range(100))
+
+        assert set(c.keys()).issubset(range(10))
+        assert set(c.values()).issubset(range(10))
+
+        pool.close()
+        pool.join()
