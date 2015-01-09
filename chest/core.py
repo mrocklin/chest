@@ -220,7 +220,6 @@ class Chest(MutableMapping):
             raise eValue
 
 
-
 def nbytes(o):
     """ Number of bytes of an object
 

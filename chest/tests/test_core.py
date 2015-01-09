@@ -252,6 +252,12 @@ def test_context_manager():
 
     assert not os.path.exists(c.path)
 
+    try:
+        with Chest() as c:
+            1 / 0
+    except Exception as e:
+        assert isinstance(e, ZeroDivisionError)
+
 
 def test_threadsafe():
     from multiprocessing.pool import ThreadPool
