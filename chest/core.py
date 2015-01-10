@@ -218,7 +218,7 @@ class Chest(MutableMapping):
 
         if eValue is not None:
             if not isinstance(eValue, Exception):  # Py26 behavior
-                eValue = eType(eValue)
+                eValue = eType(eValue) # pragma: no cover
             raise eValue
 
 
