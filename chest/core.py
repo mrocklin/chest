@@ -217,6 +217,8 @@ class Chest(MutableMapping):
             self.drop()  # pragma: no cover
 
         if eValue is not None:
+            if not isinstance(eValue, Exception):  # Py26 behavior
+                eValue = eType(eValue)
             raise eValue
 
 
