@@ -28,6 +28,7 @@ def key_to_filename(key):
 def _do_nothing(*args, **kwargs):
     pass
 
+
 class Chest(MutableMapping):
     """ A Dictionary that spills to disk
 
