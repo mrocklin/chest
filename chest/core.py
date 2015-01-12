@@ -120,8 +120,9 @@ class Chest(MutableMapping):
         """ Move data from memory onto disk """
         self._on_overflow(key)
         fn = self.key_to_filename(key)
-        with open(fn, mode='w'+self.mode) as f:
-            self.dump(self.inmem[key], f)
+        if not os.path.exists(fn):  # Only write if it doesn't exist.
+            with open(fn, mode='w'+self.mode) as f:
+                self.dump(self.inmem[key], f)
         del self.inmem[key]
 
     def get_from_disk(self, key):
