@@ -181,8 +181,9 @@ class Chest(MutableMapping):
         self.shrink()
 
     def __del__(self):
-        if not self._explicitly_given_path and os.path.exists(self.path):
-            self.drop()  # pragma: no cover
+        with self.lock:
+            if not self._explicitly_given_path and os.path.exists(self.path):
+                self.drop()  # pragma: no cover
 
     def __iter__(self):
         return iter(self._keys)

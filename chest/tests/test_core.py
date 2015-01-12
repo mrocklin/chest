@@ -273,8 +273,8 @@ def test_threadsafe():
 
         pool.map(getset, range(100))
 
-        assert set(c.keys()).issubset(range(10))
-        assert set(c.values()).issubset(range(10))
-
         pool.close()
         pool.join()
+
+        assert set(c.keys()).issubset(range(10))
+        assert set(c.values()).issubset(range(10))
