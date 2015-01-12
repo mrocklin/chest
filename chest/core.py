@@ -7,6 +7,7 @@ import shutil
 import os
 import re
 import pickle
+from heapdict import heapdict
 
 
 DEFAULT_AVAILABLE_MEMORY = 1e9
@@ -96,6 +97,10 @@ class Chest(MutableMapping):
 
         self.lock = Lock()
 
+        # LRU state
+        self.counter = 0
+        self.heap = heapdict()
+
     def __str__(self):
         return '<chest at %s>' % self.path
 
@@ -117,26 +122,33 @@ class Chest(MutableMapping):
 
         fn = self.key_to_filename(key)
         with open(fn, mode='r'+self.mode) as f:
-            self.inmem[key] = self.load(f)
+            value = self.load(f)
+
+        self.inmem[key] = value
 
     def __getitem__(self, key):
-        try:
-            return self.inmem[key]
-        except:
-            pass
+        if key in self.inmem:
+            value = self.inmem[key]
+        else:
+            if key not in self._keys:
+                raise KeyError("Key not found: %s" % key)
 
-        if key not in self._keys:
-            raise KeyError("Key not found: %s" % key)
+            with self.lock:
+                self.get_from_disk(key)
+                value = self.inmem[key]
+                self._update_lru(key)
+            self.shrink()
 
-        with self.lock:
-            self.get_from_disk(key)
-            result = self.inmem[key]
-        self.shrink()
-        return result
+        return value
+
+    def _update_lru(self, key):
+        self.counter += 1
+        self.heap[key] = self.counter
 
     def __delitem__(self, key):
         if key in self.inmem:
             del self.inmem[key]
+            del self.heap[key]
 
         fn = self.key_to_filename(key)
         if os.path.exists(fn):
@@ -151,6 +163,7 @@ class Chest(MutableMapping):
 
             self.inmem[key] = value
             self._keys.add(key)
+            self._update_lru(key)
 
         self.shrink()
 
@@ -185,13 +198,11 @@ class Chest(MutableMapping):
             return
 
         with self.lock:
-            inmem = sorted(self.inmem.items(),
-                           key=lambda kv: nbytes(kv[1]))
-
-            while inmem and mem > self.available_memory:
-                key, data = inmem.pop()
-                self.move_to_disk(key)
+            while mem > self.available_memory:
+                key, _ = self.heap.popitem()
+                data = self.inmem[key]
                 mem -= nbytes(data)
+                self.move_to_disk(key)
 
     def drop(self):
         """ Permanently remove directory from disk """

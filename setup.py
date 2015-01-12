@@ -13,6 +13,7 @@ setup(name='chest',
       maintainer_email='mrocklin@gmail.com',
       license='BSD',
       keywords='dictionary out-of-core',
+      install_requires=list(open('requirements.txt').read().strip().split('\n')),
       packages=['chest'],
       long_description=(open('README.rst').read() if exists('README.rst')
                         else ''),

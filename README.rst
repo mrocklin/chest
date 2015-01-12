@@ -58,16 +58,9 @@ Chest was designed to hold a moderate amount of largish numpy arrays.  It
 doesn't handle the very many small key-value pairs usecase (though could with
 small effort).  In particular chest has the following deficiencies
 
-1.  It determines what values to spill to disk by size.  The largest values are
-    spilled.  This can be improved by better determination of size (see the
-    ``nbytes`` function) and consideration of time-of-use (like an LRU
-    mechanism.)
-2.  Spill conditions are checked after every action.  Spill conditions often
-    involve an ``n log(n)`` sorting process.  This could be improved by
-    tracking and efficiently updating the size of all values iteratively.
-3.  Chest is not multi-process safe.  We should institute a file lock at least
+1.  Chest is not multi-process safe.  We should institute a file lock at least
     around the ``.keys`` file.
-4.  Chest does not support mutation of variables on disk.
+2.  Chest does not support mutation of variables on disk.
 
 
 LICENSE
@@ -131,10 +124,10 @@ Dependencies
 ------------
 
 ``Chest`` supports Python 2.6+ and Python 3.2+ with a common codebase.
-It is pure Python and requires no dependencies beyond the standard
-library.
 
-It is, in short, a light weight dependency.
+It currently depends on the ``heapdict`` library.
+
+It is a light weight dependency.
 
 Author
 ------

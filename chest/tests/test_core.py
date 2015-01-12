@@ -62,7 +62,7 @@ def eq(a, b):
 
 def test_limited_storage():
     x = np.ones(1000, dtype='i4')
-    y = np.ones(2000, dtype='i4')
+    y = np.ones(1000, dtype='i4')
     with tmp_chest(available_memory=5000) as c:
         c['x'] = x
         c['y'] = y
@@ -72,8 +72,8 @@ def test_limited_storage():
 
         assert len(c.inmem) == 1
 
-        assert 'x' in c.inmem
-        assert 'y' not in c.inmem
+        assert 'x' not in c.inmem
+        assert 'y' in c.inmem
 
         assert eq(c['x'], x)
         assert eq(c['y'], y)
