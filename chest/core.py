@@ -25,6 +25,9 @@ def key_to_filename(key):
         return str(abs(hash(key)))
 
 
+def _do_nothing(*args, **kwargs):
+    pass
+
 class Chest(MutableMapping):
     """ A Dictionary that spills to disk
 
@@ -69,6 +72,7 @@ class Chest(MutableMapping):
                  dump=partial(pickle.dump, protocol=pickle.HIGHEST_PROTOCOL),
                  load=pickle.load,
                  key_to_filename=key_to_filename,
+                 on_miss=_do_nothing, on_overflow=_do_nothing,
                  mode='b'):
         # In memory storage
         self.inmem = data or dict()
@@ -101,6 +105,10 @@ class Chest(MutableMapping):
         self.counter = 0
         self.heap = heapdict()
 
+        # Debug
+        self._on_miss = on_miss
+        self._on_overflow = on_overflow
+
     def __str__(self):
         return '<chest at %s>' % self.path
 
@@ -110,6 +118,7 @@ class Chest(MutableMapping):
 
     def move_to_disk(self, key):
         """ Move data from memory onto disk """
+        self._on_overflow(key)
         fn = self.key_to_filename(key)
         with open(fn, mode='w'+self.mode) as f:
             self.dump(self.inmem[key], f)
@@ -119,6 +128,8 @@ class Chest(MutableMapping):
         """ Pull value from disk into memory """
         if key in self.inmem:
             return
+
+        self._on_miss(key)
 
         fn = self.key_to_filename(key)
         with open(fn, mode='r'+self.mode) as f:
