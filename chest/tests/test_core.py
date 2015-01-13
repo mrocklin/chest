@@ -278,3 +278,24 @@ def test_threadsafe():
 
         assert set(c.keys()).issubset(range(10))
         assert set(c.values()).issubset(range(10))
+
+
+def test_undumpable_values_stay_in_memory():
+    class A(object):
+        def __getstate__(self):
+            raise TypeError()
+
+    with tmp_chest(available_memory=100) as c:
+        a = A()
+        fn = 'tmp'
+        with open(fn, 'w') as f:
+            assert raises(TypeError, lambda: c.dump(a, f))
+        os.remove(fn)
+
+        c['a'] = a
+
+        # Add enough data to try to flush out a
+        for i in range(20):
+            c[i] = i
+
+        assert 'a' in c.inmem

@@ -215,8 +215,11 @@ class Chest(MutableMapping):
             while mem > self.available_memory:
                 key, _ = self.heap.popitem()
                 data = self.inmem[key]
-                mem -= nbytes(data)
-                self.move_to_disk(key)
+                try:
+                    self.move_to_disk(key)
+                    mem -= nbytes(data)
+                except TypeError:
+                    pass
 
     def drop(self):
         """ Permanently remove directory from disk """
