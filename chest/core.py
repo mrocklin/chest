@@ -70,7 +70,7 @@ class Chest(MutableMapping):
     >>> c.drop()
     """
     def __init__(self, data=None, path=None, available_memory=None,
-                 dump=partial(pickle.dump, protocol=pickle.HIGHEST_PROTOCOL),
+                 dump=partial(pickle.dump, protocol=1),
                  load=pickle.load,
                  key_to_filename=key_to_filename,
                  on_miss=_do_nothing, on_overflow=_do_nothing,
@@ -122,8 +122,12 @@ class Chest(MutableMapping):
         self._on_overflow(key)
         fn = self.key_to_filename(key)
         if not os.path.exists(fn):  # Only write if it doesn't exist.
-            with open(fn, mode='w'+self.mode) as f:
-                self.dump(self.inmem[key], f)
+            try:
+                with open(fn, mode='w'+self.mode) as f:
+                    self.dump(self.inmem[key], f)
+            except TypeError:
+                os.remove(fn)
+                raise
         del self.inmem[key]
 
     def get_from_disk(self, key):
@@ -161,6 +165,7 @@ class Chest(MutableMapping):
     def __delitem__(self, key):
         if key in self.inmem:
             del self.inmem[key]
+        if key in self.heap:
             del self.heap[key]
 
         fn = self.key_to_filename(key)

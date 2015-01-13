@@ -299,3 +299,4 @@ def test_undumpable_values_stay_in_memory():
             c[i] = i
 
         assert 'a' in c.inmem
+        assert not os.path.exists(c.key_to_filename('a'))
