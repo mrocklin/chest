@@ -100,7 +100,7 @@ Example
 
     >>> # These files hold pickled results
     >>> import pickle
-    >>> pickle.load(open(c.path))
+    >>> pickle.load(open(c.key_to_filename('x')))
     [1, 2, 3]
 
     >>> # Though one normally accesses these files with chest itself
@@ -110,13 +110,13 @@ Example
     >>> c2['x']
     [1, 2, 3]
 
-    >>> # Chest is configurable, so one can use json instead of pickle
+    >>> # Chest is configurable, so one can use json, etc. instead of pickle
     >>> import json
     >>> c = Chest(path='my-chest', dump=json.dump, load=json.load)
     >>> c['x'] = [1, 2, 3]
     >>> c.flush()
 
-    >>> json.load(open('my-chest'))
+    >>> json.load(open(c.key_to_filename('x')))
     [1, 2, 3]
 
 
