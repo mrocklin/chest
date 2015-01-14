@@ -19,7 +19,8 @@ def tmp_chest(*args, **kwargs):
         yield c
     finally:
         if os.path.exists(fn):
-            c.drop()
+            with c.lock:
+                c.drop()
         try:
             del c
         except:
@@ -264,6 +265,7 @@ def test_threadsafe():
     from random import randint
 
     pool = ThreadPool(8)
+    n = 100
     with tmp_chest(available_memory=48) as c:
         for i in range(10):
             c[i] = i
@@ -271,7 +273,7 @@ def test_threadsafe():
         def getset(_):
             c[randint(0, 9)] = c[randint(0, 9)]
 
-        pool.map(getset, range(100))
+        pool.map(getset, range(n))
 
         pool.close()
         pool.join()

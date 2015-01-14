@@ -144,16 +144,18 @@ class Chest(MutableMapping):
         self.inmem[key] = value
 
     def __getitem__(self, key):
-        if key in self.inmem:
-            value = self.inmem[key]
-        else:
-            if key not in self._keys:
-                raise KeyError("Key not found: %s" % key)
+        with self.lock:
+            if key in self.inmem:
+                value = self.inmem[key]
+            else:
+                if key not in self._keys:
+                    raise KeyError("Key not found: %s" % key)
 
-            with self.lock:
                 self.get_from_disk(key)
                 value = self.inmem[key]
                 self._update_lru(key)
+
+        with self.lock:
             self.shrink()
 
         return value
@@ -183,7 +185,8 @@ class Chest(MutableMapping):
             self._keys.add(key)
             self._update_lru(key)
 
-        self.shrink()
+        with self.lock:
+            self.shrink()
 
     def __del__(self):
         with self.lock:
@@ -201,8 +204,7 @@ class Chest(MutableMapping):
 
     @property
     def memory_usage(self):
-        with self.lock:
-            result = sum(map(nbytes, self.inmem.values()))
+        result = sum(map(nbytes, self.inmem.values()))
         return result
 
     def shrink(self):
@@ -216,15 +218,14 @@ class Chest(MutableMapping):
         if mem < self.available_memory:
             return
 
-        with self.lock:
-            while mem > self.available_memory:
-                key, _ = self.heap.popitem()
-                data = self.inmem[key]
-                try:
-                    self.move_to_disk(key)
-                    mem -= nbytes(data)
-                except TypeError:
-                    pass
+        while mem > self.available_memory:
+            key, _ = self.heap.popitem()
+            data = self.inmem[key]
+            try:
+                self.move_to_disk(key)
+                mem -= nbytes(data)
+            except TypeError:
+                pass
 
     def drop(self):
         """ Permanently remove directory from disk """
@@ -246,8 +247,10 @@ class Chest(MutableMapping):
         return self
 
     def __exit__(self, eType, eValue, eTrace):
-        if not self._explicitly_given_path and os.path.exists(self.path):
-            self.drop()  # pragma: no cover
+        with self.lock:
+            L = os.listdir(self.path)
+            if not self._explicitly_given_path and os.path.exists(self.path):
+                self.drop()  # pragma: no cover
 
         if eValue is not None:
             if not isinstance(eValue, Exception):  # Py26 behavior
