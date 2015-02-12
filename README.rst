@@ -129,12 +129,7 @@ It currently depends on the ``heapdict`` library.
 
 It is a light weight dependency.
 
-Author
-------
 
-Chest was originally created by `Matthew Rocklin`_
-
-.. _`Matthew Rocklin`: http://matthewrocklin.com
 .. _shelve: https://docs.python.org/3/library/shelve.html
 .. _Shove: https://pypi.python.org/pypi/shove/0.5.6
 .. _License: https://github.com/mrocklin/chest/blob/master/LICENSE.txt
