@@ -8,7 +8,7 @@ import os
 import re
 import pickle
 from heapdict import heapdict
-
+import hashlib
 
 DEFAULT_AVAILABLE_MEMORY = 1e9
 
@@ -22,7 +22,7 @@ def key_to_filename(key):
     if isinstance(key, str) and re.match('^[_a-zA-Z]\w*$', key):
         return key
     else:
-        return str(abs(hash(key)))
+        return str(hashlib.md5(str(key).encode()).hexdigest())
 
 
 def _do_nothing(*args, **kwargs):
