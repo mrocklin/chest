@@ -1,4 +1,4 @@
-from chest.core import Chest, nbytes, key_to_filename
+from chest.core import Chest, nbytes, key_to_filename, merge
 import os
 import re
 import json
@@ -302,3 +302,16 @@ def test_undumpable_values_stay_in_memory():
 
         assert 'a' in c.inmem
         assert not os.path.exists(c.key_to_filename('a'))
+
+
+def test_merge():
+    with tmp_chest() as a:
+        with tmp_chest() as b:
+            a[1] = 'one'
+            a.flush()
+            b[2] = 'two'
+            b.flush()
+
+            c = merge(a, b)
+            assert c[1] == 'one'
+            assert c[2] == 'two'
