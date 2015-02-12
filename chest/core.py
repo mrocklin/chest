@@ -22,7 +22,7 @@ def key_to_filename(key):
     if isinstance(key, str) and re.match('^[_a-zA-Z]\w*$', key):
         return key
     else:
-        return str(hashlib.md5(key.encode()).hexdigest())
+        return str(hashlib.md5(str(key).encode()).hexdigest())
 
 
 def _do_nothing(*args, **kwargs):
