@@ -312,8 +312,8 @@ def test_eat():
             c2['bar'] = 'foo'
             c2['spam'] = 'eggs'
             c1.eat(c2)
-            assert c1['foo']  == 'bar'
-            assert c1['bar']  == 'foo'
+            assert c1['foo'] == 'bar'
+            assert c1['bar'] == 'foo'
             assert c1['spam'] == 'eggs'
 
 
@@ -325,6 +325,6 @@ def test_eat_no_overwrite():
             c2['bar'] = 'foo'
             c2['spam'] = 'eggs'
             c1.eat(c2, overwrite=False)
-            assert c1['foo']  == 'bar'
-            assert c1['bar']  == 'bbq'
+            assert c1['foo'] == 'bar'
+            assert c1['bar'] == 'bbq'
             assert c1['spam'] == 'eggs'
