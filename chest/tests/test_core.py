@@ -302,3 +302,28 @@ def test_undumpable_values_stay_in_memory():
 
         assert 'a' in c.inmem
         assert not os.path.exists(c.key_to_filename('a'))
+
+def test_eat():
+    with tmp_chest() as c1:
+        with tmp_chest() as c2:
+          c1['foo'] = 'bar'
+          c1['bar'] = 'bbq'
+          c2['bar'] = 'foo'
+          c2['spam'] = 'eggs'
+          c1.eat(c2)
+          assert c1['foo']  == 'bar'
+          assert c1['bar']  == 'foo'
+          assert c1['spam'] == 'eggs'
+
+def test_eat_no_overwrite():
+    with tmp_chest() as c1:
+        with tmp_chest() as c2:
+          c1['foo'] = 'bar'
+          c1['bar'] = 'bbq'
+          c2['bar'] = 'foo'
+          c2['spam'] = 'eggs'
+          c1.eat(c2, overwrite=False)
+          assert c1['foo']  == 'bar'
+          assert c1['bar']  == 'bbq'
+          assert c1['spam'] == 'eggs'
+

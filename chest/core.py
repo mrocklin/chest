@@ -257,6 +257,21 @@ class Chest(MutableMapping):
                 eValue = eType(eValue)  # pragma: no cover
             raise eValue
 
+    def eat(self, food, overwrite=True):
+        """ Move the contents of chest food to this chest """
+        #  if already flushed, then this does nothing
+        food.flush()
+        for key in food._keys:
+            if key in self._keys and overwrite:
+              del self[key]  
+            elif key in self._keys and not overwrite:
+              continue
+            old_fn = os.path.join(food.path, food._key_to_filename(key))
+            new_fn = os.path.join(self.path, self._key_to_filename(key))
+            os.rename(old_fn, new_fn)
+            self._keys.add(key)
+        food.drop()
+
 
 def nbytes(o):
     """ Number of bytes of an object
