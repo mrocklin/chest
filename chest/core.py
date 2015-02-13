@@ -257,6 +257,21 @@ class Chest(MutableMapping):
                 eValue = eType(eValue)  # pragma: no cover
             raise eValue
 
+    def update(self, other, overwrite=True):
+        """ Copy (hard-link) the contents of chest other to this chest """
+        #  if already flushed, then this does nothing
+        self.flush()
+        other.flush()
+        for key in other._keys:
+            if key in self._keys and overwrite:
+                del self[key]
+            elif key in self._keys and not overwrite:
+                continue
+            old_fn = os.path.join(other.path, other._key_to_filename(key))
+            new_fn = os.path.join(self.path, self._key_to_filename(key))
+            os.link(old_fn, new_fn)
+            self._keys.add(key)
+
 
 def nbytes(o):
     """ Number of bytes of an object
