@@ -263,9 +263,9 @@ class Chest(MutableMapping):
         food.flush()
         for key in food._keys:
             if key in self._keys and overwrite:
-              del self[key]  
+                del self[key]
             elif key in self._keys and not overwrite:
-              continue
+                continue
             old_fn = os.path.join(food.path, food._key_to_filename(key))
             new_fn = os.path.join(self.path, self._key_to_filename(key))
             os.rename(old_fn, new_fn)
