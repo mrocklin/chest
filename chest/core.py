@@ -98,13 +98,10 @@ class Chest(MutableMapping):
         self.mode = mode
         self._key_to_filename = key_to_filename
 
-        if os.path.exists(self.path):
-            keyfile = os.path.join(self.path, '.keys')
-            if os.path.exists(keyfile):
-                with open(keyfile, mode='r'+self.mode) as f:
-                    self._keys = set(self.load(f))
-        else:
-            os.mkdir(self.path)
+        keyfile = os.path.join(self.path, '.keys')
+        if os.path.exists(keyfile):
+            with open(keyfile, mode='r'+self.mode) as f:
+                self._keys = set(self.load(f))
 
         self.lock = Lock()
 
