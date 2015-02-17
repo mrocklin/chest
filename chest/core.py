@@ -83,6 +83,8 @@ class Chest(MutableMapping):
         self._explicitly_given_path = path is not None
         # Diretory where the on-disk data will be held
         self.path = path or tempfile.mkdtemp('.chest')
+        if not os.path.exists(self.path):
+            os.mkdir(self.path)
         # Amount of memory we're allowed to use
         self.available_memory = (available_memory if available_memory
                                  is not None else DEFAULT_AVAILABLE_MEMORY)
@@ -189,8 +191,10 @@ class Chest(MutableMapping):
             self.shrink()
 
     def __del__(self):
-        with self.lock:
-            if not self._explicitly_given_path and os.path.exists(self.path):
+        if self._explicitly_given_path:
+            self.flush()
+        elif os.path.exists(self.path):
+            with self.lock:
                 self.drop()  # pragma: no cover
 
     def __iter__(self):

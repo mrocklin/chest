@@ -348,3 +348,12 @@ def test_update():
             assert c1['spam'] == 'eggs'
             assert c2['bar'] == 'foo'
             assert c2['spam'] == 'eggs'
+
+
+def test_del_flushes():
+    with tmp_chest(path='foo') as c:
+        assert c._explicitly_given_path
+        c[1] = 1
+        fn = c.key_to_filename(1)
+        c.__del__()
+        assert os.path.exists(fn)
