@@ -21,6 +21,10 @@ def key_to_filename(key):
     """
     if isinstance(key, str) and re.match('^[_a-zA-Z]\w*$', key):
         return key
+    if isinstance(key, tuple):
+        names = (['_' + key_to_filename(k) for k in key[:-1]] +
+                 [key_to_filename(key[-1])])
+        return os.path.join(*names)
     else:
         return str(hashlib.md5(str(key).encode()).hexdigest())
 
@@ -94,13 +98,10 @@ class Chest(MutableMapping):
         self.mode = mode
         self._key_to_filename = key_to_filename
 
-        if os.path.exists(self.path):
-            keyfile = os.path.join(self.path, '.keys')
-            if os.path.exists(keyfile):
-                with open(keyfile, mode='r'+self.mode) as f:
-                    self._keys = set(self.load(f))
-        else:
-            os.mkdir(self.path)
+        keyfile = os.path.join(self.path, '.keys')
+        if os.path.exists(keyfile):
+            with open(keyfile, mode='r'+self.mode) as f:
+                self._keys = set(self.load(f))
 
         self.lock = Lock()
 
@@ -124,6 +125,9 @@ class Chest(MutableMapping):
         self._on_overflow(key)
         fn = self.key_to_filename(key)
         if not os.path.exists(fn):  # Only write if it doesn't exist.
+            dir = os.path.dirname(fn)
+            if not os.path.exists(dir):
+                os.makedirs(dir)
             try:
                 with open(fn, mode='w'+self.mode) as f:
                     self.dump(self.inmem[key], f)
