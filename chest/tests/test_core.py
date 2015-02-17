@@ -251,6 +251,12 @@ def test_key_to_filename():
     assert re.match('^\w+$', key_to_filename('1/2'))
 
 
+def test_key_to_filename_with_tuples():
+    a, two = os.path.split(key_to_filename(('one', 'two')))
+    b, three = os.path.split(key_to_filename(('one', 'three')))
+    assert a == b
+
+
 def test_context_manager():
     with Chest() as c:
         c[1] = 1
@@ -357,3 +363,25 @@ def test_del_flushes():
         fn = c.key_to_filename(1)
         c.__del__()
         assert os.path.exists(fn)
+
+
+def test_nested_files_with_tuples():
+    with tmp_chest(path='foo') as c:
+        c['one'] = 1
+        c['one', 'two'] = 12
+        c['one', 'three'] = 13
+
+        assert c['one'] == 1
+        assert c['one', 'two'] == 12
+        assert c['one', 'three'] == 13
+
+        c.flush()
+        paths = [fn for fn in os.listdir(c.path) if fn != '.keys']
+        assert len(paths) == 2
+        assert any(os.path.isdir(os.path.join(c.path, p)) for p in paths)
+        assert any(not os.path.isdir(os.path.join(c.path, p)) for p in paths)
+
+
+        c['a', 'b', 'c', 'd', 'e'] = 5
+        c.flush()
+        assert c['a', 'b', 'c', 'd', 'e'] == 5
