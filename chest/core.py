@@ -22,8 +22,8 @@ def key_to_filename(key):
     if isinstance(key, str) and re.match('^[_a-zA-Z]\w*$', key):
         return key
     if isinstance(key, tuple):
-        names = (['_' + key_to_filename(k) for k in key[:-1]]
-                + [key_to_filename(key[-1])])
+        names = (['_' + key_to_filename(k) for k in key[:-1]] +
+                 [key_to_filename(key[-1])])
         return os.path.join(*names)
     else:
         return str(hashlib.md5(str(key).encode()).hexdigest())

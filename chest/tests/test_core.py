@@ -381,7 +381,6 @@ def test_nested_files_with_tuples():
         assert any(os.path.isdir(os.path.join(c.path, p)) for p in paths)
         assert any(not os.path.isdir(os.path.join(c.path, p)) for p in paths)
 
-
         c['a', 'b', 'c', 'd', 'e'] = 5
         c.flush()
         assert c['a', 'b', 'c', 'd', 'e'] == 5
