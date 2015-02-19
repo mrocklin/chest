@@ -277,6 +277,9 @@ class Chest(MutableMapping):
                 continue
             old_fn = os.path.join(other.path, other._key_to_filename(key))
             new_fn = os.path.join(self.path, self._key_to_filename(key))
+            dir = os.path.dirname(new_fn)
+            if not os.path.exists(dir):
+                os.makedirs(dir) 
             os.link(old_fn, new_fn)
             self._keys.add(key)
 
