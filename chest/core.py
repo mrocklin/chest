@@ -82,7 +82,7 @@ class Chest(MutableMapping):
         # In memory storage
         self.inmem = data or dict()
         # A set of keys held both in memory or on disk
-        self._keys = set()
+        self._keys = {}
         # Was a path given or no?  If not we'll clean up the directory later
         self._explicitly_given_path = path is not None
         # Diretory where the on-disk data will be held
@@ -101,7 +101,7 @@ class Chest(MutableMapping):
         keyfile = os.path.join(self.path, '.keys')
         if os.path.exists(keyfile):
             with open(keyfile, mode='r'+self.mode) as f:
-                self._keys = set(self.load(f))
+                self._keys = dict(self.load(f))
 
         self.lock = Lock()
 
@@ -154,7 +154,7 @@ class Chest(MutableMapping):
             if key in self.inmem:
                 value = self.inmem[key]
             else:
-                if key not in self._keys:
+                if key not in self._keys.keys():
                     raise KeyError("Key not found: %s" % key)
 
                 self.get_from_disk(key)
@@ -180,15 +180,15 @@ class Chest(MutableMapping):
         if os.path.exists(fn):
             os.remove(fn)
 
-        self._keys.remove(key)
+        del self._keys[key]
 
     def __setitem__(self, key, value):
         with self.lock:
-            if key in self._keys:
+            if key in self._keys.keys():
                 del self[key]
 
             self.inmem[key] = value
-            self._keys.add(key)
+            self._keys[key] = self.key_to_filename(key)
             self._update_lru(key)
 
         with self.lock:
@@ -202,13 +202,13 @@ class Chest(MutableMapping):
                 self.drop()  # pragma: no cover
 
     def __iter__(self):
-        return iter(self._keys)
+        return iter(self._keys.keys())
 
     def __len__(self):
-        return len(self._keys)
+        return len(self._keys.keys())
 
     def __contains__(self, key):
-        return key in self._keys
+        return key in self._keys.keys()
 
     @property
     def memory_usage(self):
@@ -242,7 +242,7 @@ class Chest(MutableMapping):
     def write_keys(self):
         fn = os.path.join(self.path, '.keys')
         with open(fn, mode='w'+self.mode) as f:
-            self.dump(list(self._keys), f)
+            self.dump(list(iter(self._keys.items())), f)
 
     def flush(self):
         """ Flush all in-memory storage to disk """
@@ -270,18 +270,18 @@ class Chest(MutableMapping):
         #  if already flushed, then this does nothing
         self.flush()
         other.flush()
-        for key in other._keys:
+        for key in other._keys.keys():
             if key in self._keys and overwrite:
                 del self[key]
             elif key in self._keys and not overwrite:
                 continue
-            old_fn = os.path.join(other.path, other._key_to_filename(key))
+            old_fn = other._keys[key] 
             new_fn = os.path.join(self.path, self._key_to_filename(key))
             dir = os.path.dirname(new_fn)
             if not os.path.exists(dir):
                 os.makedirs(dir)
             os.link(old_fn, new_fn)
-            self._keys.add(key)
+            self._keys[key] = new_fn
 
 
 def nbytes(o):
