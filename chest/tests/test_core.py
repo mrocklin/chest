@@ -328,17 +328,17 @@ def test_eat():
             assert c1['spam'] == 'eggs'
 
 
-def test_eat_no_overwrite():
+def test_update_no_overwrite():
     with tmp_chest() as c1:
         with tmp_chest() as c2:
             c1['foo'] = 'bar'
             c1['bar'] = 'bbq'
             c2['bar'] = 'foo'
-            c2['spam'] = 'eggs'
+            c2['spam', 'spam'] = 'eggs'
             c1.update(c2, overwrite=False)
             assert c1['foo'] == 'bar'
             assert c1['bar'] == 'bbq'
-            assert c1['spam'] == 'eggs'
+            assert c1['spam', 'spam'] == 'eggs'
 
 
 def test_update():
@@ -347,13 +347,13 @@ def test_update():
             c1['foo'] = 'bar'
             c1['bar'] = 'bbq'
             c2['bar'] = 'foo'
-            c2['spam'] = 'eggs'
+            c2['spam', 'spam'] = 'eggs'
             c1.update(c2)
             assert c1['foo'] == 'bar'
             assert c1['bar'] == 'foo'
-            assert c1['spam'] == 'eggs'
+            assert c1['spam', 'spam'] == 'eggs'
             assert c2['bar'] == 'foo'
-            assert c2['spam'] == 'eggs'
+            assert c2['spam', 'spam'] == 'eggs'
 
 
 def test_del_flushes():
