@@ -8,6 +8,7 @@ from contextlib import contextmanager
 import numpy as np
 from chest.utils import raises
 import time
+import hashlib
 
 
 @contextmanager
@@ -25,6 +26,11 @@ def tmp_chest(*args, **kwargs):
             del c
         except:
             pass
+
+
+def my_key_to_fname(key):
+    fname = str(hashlib.md5(str(key).encode()).hexdigest())
+    return fname
 
 
 def test_basic():
@@ -384,3 +390,13 @@ def test_nested_files_with_tuples():
         c['a', 'b', 'c', 'd', 'e'] = 5
         c.flush()
         assert c['a', 'b', 'c', 'd', 'e'] == 5
+
+
+def test_store_fnames():
+    with tmp_chest(key_to_filename=my_key_to_fname) as c1:
+        c1[('spam', 'eggs')] = 'spam and eggs'
+        c1.flush()
+        with tmp_chest() as c2:
+            c2.update(c1)
+            c2.flush()
+            assert c2[('spam', 'eggs')] == 'spam and eggs'
