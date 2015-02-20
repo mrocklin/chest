@@ -154,7 +154,7 @@ class Chest(MutableMapping):
             if key in self.inmem:
                 value = self.inmem[key]
             else:
-                if key not in self._keys.keys():
+                if key not in self._keys:
                     raise KeyError("Key not found: %s" % key)
 
                 self.get_from_disk(key)
@@ -184,7 +184,7 @@ class Chest(MutableMapping):
 
     def __setitem__(self, key, value):
         with self.lock:
-            if key in self._keys.keys():
+            if key in self._keys:
                 del self[key]
 
             self.inmem[key] = value
@@ -202,13 +202,13 @@ class Chest(MutableMapping):
                 self.drop()  # pragma: no cover
 
     def __iter__(self):
-        return iter(self._keys.keys())
+        return iter(self._keys)
 
     def __len__(self):
-        return len(self._keys.keys())
+        return len(self._keys)
 
     def __contains__(self, key):
-        return key in self._keys.keys()
+        return key in self._keys
 
     @property
     def memory_usage(self):
@@ -242,7 +242,7 @@ class Chest(MutableMapping):
     def write_keys(self):
         fn = os.path.join(self.path, '.keys')
         with open(fn, mode='w'+self.mode) as f:
-            self.dump(list(iter(self._keys.items())), f)
+            self.dump(list(self._keys.items()), f)
 
     def flush(self):
         """ Flush all in-memory storage to disk """
@@ -270,7 +270,7 @@ class Chest(MutableMapping):
         #  if already flushed, then this does nothing
         self.flush()
         other.flush()
-        for key in other._keys.keys():
+        for key in other._keys:
             if key in self._keys and overwrite:
                 del self[key]
             elif key in self._keys and not overwrite:
