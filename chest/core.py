@@ -196,7 +196,12 @@ class Chest(MutableMapping):
 
     def __del__(self):
         if self._explicitly_given_path:
-            self.flush()
+            if os.path.exists(self.path):
+                self.flush()
+            else:
+                with self.lock:
+                    for key in list(self.inmem):
+                        del self.inmem[key]
         elif os.path.exists(self.path):
             with self.lock:
                 self.drop()  # pragma: no cover
