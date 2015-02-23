@@ -118,12 +118,15 @@ class Chest(MutableMapping):
 
     def key_to_filename(self, key):
         """ Filename where key will be held """
-        return os.path.join(self.path, self._key_to_filename(key))
+        if key in self._keys:
+            return os.path.join(self.path, self._keys[key])
+        else:
+            return os.path.join(self.path, self._key_to_filename(key))
 
     def move_to_disk(self, key):
         """ Move data from memory onto disk """
         self._on_overflow(key)
-        fn = self._keys[key]
+        fn = self.key_to_filename(key)
         if not os.path.exists(fn):  # Only write if it doesn't exist.
             dir = os.path.dirname(fn)
             if not os.path.exists(dir):
@@ -143,7 +146,7 @@ class Chest(MutableMapping):
 
         self._on_miss(key)
 
-        fn = self._keys[key]
+        fn = self.key_to_filename(key)
         with open(fn, mode='r'+self.mode) as f:
             value = self.load(f)
 
@@ -176,7 +179,7 @@ class Chest(MutableMapping):
         if key in self.heap:
             del self.heap[key]
 
-        fn = self._keys[key]
+        fn = self.key_to_filename(key)
         if os.path.exists(fn):
             os.remove(fn)
 
@@ -188,7 +191,7 @@ class Chest(MutableMapping):
                 del self[key]
 
             self.inmem[key] = value
-            self._keys[key] = self.key_to_filename(key)
+            self._keys[key] = self._key_to_filename(key)
             self._update_lru(key)
 
         with self.lock:
@@ -280,13 +283,13 @@ class Chest(MutableMapping):
                 del self[key]
             elif key in self._keys and not overwrite:
                 continue
-            old_fn = other._keys[key]
-            new_fn = os.path.join(self.path, self._key_to_filename(key))
+            old_fn = other.key_to_filename(key)
+            self._keys[key] = self._key_to_filename(key)
+            new_fn = self.key_to_filename(key)
             dir = os.path.dirname(new_fn)
             if not os.path.exists(dir):
                 os.makedirs(dir)
             os.link(old_fn, new_fn)
-            self._keys[key] = new_fn
 
 
 def nbytes(o):
