@@ -400,3 +400,15 @@ def test_store_fnames():
             c2.update(c1)
             c2.flush()
             assert c2[('spam', 'eggs')] == 'spam and eggs'
+
+
+def test_store_fnames_relocatable():
+    with tmp_chest(path="somewhere", key_to_filename=my_key_to_fname) as c1:
+        c1[('spam', 'eggs')] = 'spam and eggs'
+        c1.flush()
+        os.rename("somewhere", "else")
+        with tmp_chest(path="else") as c1:
+            with tmp_chest(path="somewhereelse") as c2:
+                c2.update(c1)
+                c2.flush()
+                assert c2[('spam', 'eggs')] == 'spam and eggs'
