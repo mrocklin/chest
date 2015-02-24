@@ -371,6 +371,15 @@ def test_del_flushes():
         assert os.path.exists(fn)
 
 
+def test_del_drops():
+    with tmp_chest() as c:
+        c[1] = 1
+        fn = c.key_to_filename(1)
+        c.flush()
+        c.__del__()
+        assert not os.path.exists(fn)
+
+
 def test_nested_files_with_tuples():
     with tmp_chest(path='foo') as c:
         c['one'] = 1
