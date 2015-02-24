@@ -132,12 +132,12 @@ It is a light weight dependency.
 
 .. _shelve: https://docs.python.org/3/library/shelve.html
 .. _Shove: https://pypi.python.org/pypi/shove/0.5.6
-.. _License: https://github.com/mrocklin/chest/blob/master/LICENSE.txt
+.. _License: https://github.com/ContinuumIO/chest/blob/master/LICENSE.txt
 .. _Redis: http://redis.io/
-.. |Build Status| image:: https://travis-ci.org/mrocklin/chest.png
-   :target: https://travis-ci.org/mrocklin/chest
-.. |Coverage Status| image:: https://coveralls.io/repos/mrocklin/chest/badge.png
-   :target: https://coveralls.io/r/mrocklin/chest
+.. |Build Status| image:: https://travis-ci.org/ContinuumIO/chest.png
+   :target: https://travis-ci.org/ContinuumIO/chest
+.. |Coverage Status| image:: https://coveralls.io/repos/ContinuumIO/chest/badge.png
+   :target: https://coveralls.io/r/ContinuumIO/chest
 .. |Version Status| image:: https://pypip.in/v/chest/badge.png
    :target: https://pypi.python.org/pypi/chest/
 .. |Downloads| image:: https://pypip.in/d/chest/badge.png
