@@ -204,6 +204,15 @@ def test_nbytes():
     assert nbytes(np.ones(1000, dtype='i4')) >= 4000
 
 
+def test_dataframe_nbytes():
+    try:
+        import pandas as pd
+        df = pd.DataFrame({'a': [1]*10000})
+        assert nbytes(df) > 10000
+    except ImportError:
+        pass
+
+
 def test_del_on_temp_path():
     c = Chest()
     c[1] = 'one'

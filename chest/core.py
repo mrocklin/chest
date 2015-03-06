@@ -305,7 +305,9 @@ def nbytes(o):
     >>> nbytes(np.ones(1000, dtype='i4'))
     4000
     """
-    try:
+    if hasattr(o, 'nbytes'):
         return o.nbytes
-    except AttributeError:
+    if hasattr(o, 'values') and hasattr(o, 'index'):
+        return o.values.nbytes + o.index.nbytes
+    else:
         return sys.getsizeof(o)
