@@ -308,6 +308,6 @@ def nbytes(o):
     if hasattr(o, 'nbytes'):
         return o.nbytes
     if hasattr(o, 'values') and hasattr(o, 'index'):
-        return o.values.nbytes + o.index.nbytes
+        return o.values.nbytes + o.index.nbytes  # pragma: no cover
     else:
         return sys.getsizeof(o)
