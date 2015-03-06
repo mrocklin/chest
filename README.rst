@@ -136,8 +136,8 @@ It is a light weight dependency.
 .. _Redis: http://redis.io/
 .. |Build Status| image:: https://travis-ci.org/ContinuumIO/chest.png
    :target: https://travis-ci.org/ContinuumIO/chest
-.. |Coverage Status| image:: https://coveralls.io/repos/ContinuumIO/chest/badge.png
-   :target: https://coveralls.io/r/ContinuumIO/chest
+.. |Coverage Status| image:: https://coveralls.io/repos/mrocklin/chest/badge.png
+   :target: https://coveralls.io/r/mrocklin/chest
 .. |Version Status| image:: https://pypip.in/v/chest/badge.png
    :target: https://pypi.python.org/pypi/chest/
 .. |Downloads| image:: https://pypip.in/d/chest/badge.png
