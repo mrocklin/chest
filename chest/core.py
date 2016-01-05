@@ -82,7 +82,9 @@ class Chest(MutableMapping):
         # In memory storage
         self.inmem = data or dict()
         # A set of keys held both in memory or on disk
-        self._keys = {}
+        self._keys = dict((k, key_to_filename(k))
+                          for k in
+                          (set(data) if data is not None else {}))
         # Was a path given or no?  If not we'll clean up the directory later
         self._explicitly_given_path = path is not None
         # Diretory where the on-disk data will be held
