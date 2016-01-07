@@ -430,3 +430,14 @@ def test_store_fnames_relocatable():
                 c2.update(c1)
                 c2.flush()
                 assert c2[('spam', 'eggs')] == 'spam and eggs'
+
+
+def test_initial_key_in_chest():
+    # see github issue 6
+    with tmp_chest({'tofu': 'scramble'}) as c:
+        c['banana'] = 'smoothie'
+
+        assert 'tofu' in c
+        assert 'banana' in c
+        assert c['tofu'] == 'scramble'
+        assert c['banana'] == 'smoothie'
